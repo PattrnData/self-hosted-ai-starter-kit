@@ -32,7 +32,8 @@ networks:
       
 x-n8n: &service-n8n
   image: n8nio/n8n:latest
-  networks: ['app-network']
+  networks:
+      - app-network
   environment:
     - DB_TYPE=postgresdb
     - DB_POSTGRESDB_HOST=postgres
@@ -48,7 +49,8 @@ x-n8n: &service-n8n
 x-ollama: &service-ollama
   image: ollama/ollama:latest
   container_name: ollama
-  networks: ['app-network']
+  networks:
+      - app-network
   restart: unless-stopped
   ports:
     - 11434:11434
@@ -57,7 +59,8 @@ x-ollama: &service-ollama
 
 x-init-ollama: &init-ollama
   image: ollama/ollama:latest
-  networks: ['app-network']
+  networks:
+      - app-network
   container_name: ollama-pull-llama
   volumes:
     - ollama_storage:/root/.ollama
@@ -69,7 +72,8 @@ x-init-ollama: &init-ollama
 services:
   postgres:
     image: postgres:16-alpine
-    networks: ['app-network']
+    networks:
+      - app-network
     restart: unless-stopped
     environment:
       - POSTGRES_USER
@@ -151,7 +155,8 @@ services:
       
 nextcloud-aio-mastercontainer:
     image: nextcloud/all-in-one:latest
-    networks: ['app-network']
+   networks:
+      - app-network
     init: true
     restart: always
     container_name: nextcloud-aio-mastercontainer
@@ -163,16 +168,17 @@ nextcloud-aio-mastercontainer:
 
    flowise:
         image: flowiseai/flowise
+        networks: ['app-network']
         restart: always
         environment:
-            - PORT=${PORT}
+            - PORT=${FLOW_PORT}
             - CORS_ORIGINS=${CORS_ORIGINS}
             - IFRAME_ORIGINS=${IFRAME_ORIGINS}
             - FLOWISE_USERNAME=${FLOWISE_USERNAME}
             - FLOWISE_PASSWORD=${FLOWISE_PASSWORD}
             - FLOWISE_FILE_SIZE_LIMIT=${FLOWISE_FILE_SIZE_LIMIT}
             - DEBUG=${DEBUG}
-            - DATABASE_PATH=${DATABASE_PATH}
+            - DATABASE_PATH=${FLOW_DATABASE_PATH}
             - DATABASE_TYPE=${DATABASE_TYPE}
             - DATABASE_PORT=${DATABASE_PORT}
             - DATABASE_HOST=${DATABASE_HOST}
@@ -182,19 +188,19 @@ nextcloud-aio-mastercontainer:
             - DATABASE_SSL=${DATABASE_SSL}
             - DATABASE_SSL_KEY_BASE64=${DATABASE_SSL_KEY_BASE64}
             - APIKEY_STORAGE_TYPE=${APIKEY_STORAGE_TYPE}
-            - APIKEY_PATH=${APIKEY_PATH}
-            - SECRETKEY_PATH=${SECRETKEY_PATH}
+            - APIKEY_PATH=${FLOW_APIKEY_PATH}
+            - SECRETKEY_PATH=${FLOW_SECRETKEY_PATH}
             - FLOWISE_SECRETKEY_OVERWRITE=${FLOWISE_SECRETKEY_OVERWRITE}
             - LOG_LEVEL=${LOG_LEVEL}
-            - LOG_PATH=${LOG_PATH}
-            - BLOB_STORAGE_PATH=${BLOB_STORAGE_PATH}
+            - LOG_PATH=${FLOW_LOG_PATH}
+            - BLOB_STORAGE_PATH=${FLOW_BLOB_STORAGE_PATH}
             - DISABLE_FLOWISE_TELEMETRY=${DISABLE_FLOWISE_TELEMETRY}
             - MODEL_LIST_CONFIG_JSON=${MODEL_LIST_CONFIG_JSON}
             - GLOBAL_AGENT_HTTP_PROXY=${GLOBAL_AGENT_HTTP_PROXY}
             - GLOBAL_AGENT_HTTPS_PROXY=${GLOBAL_AGENT_HTTPS_PROXY}
             - GLOBAL_AGENT_NO_PROXY=${GLOBAL_AGENT_NO_PROXY}
         ports:
-            - '${PORT}:${PORT}'
+            - '${FLOW_PORT}:${FLOW_PORT}'
         volumes:
             - ~/.flowise:/root/.flowise
         entrypoint: /bin/sh -c "sleep 3; flowise start"
